@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["pallas","vesta"],"struct":["Ep","EpAffine","Eq","EqAffine","Fp","Fq"]};

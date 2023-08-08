@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["trusted_setup_generator"]};

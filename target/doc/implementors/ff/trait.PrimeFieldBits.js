@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"pasta_curves":[["impl <a class=\"trait\" href=\"ff/trait.PrimeFieldBits.html\" title=\"trait ff::PrimeFieldBits\">PrimeFieldBits</a> for <a class=\"struct\" href=\"pasta_curves/struct.Fq.html\" title=\"struct pasta_curves::Fq\">Fq</a>"],["impl <a class=\"trait\" href=\"ff/trait.PrimeFieldBits.html\" title=\"trait ff::PrimeFieldBits\">PrimeFieldBits</a> for <a class=\"struct\" href=\"pasta_curves/struct.Fp.html\" title=\"struct pasta_curves::Fp\">Fp</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

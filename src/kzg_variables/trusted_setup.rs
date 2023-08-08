@@ -1,27 +1,26 @@
-use crate::FieldExt;
-use halo2::halo2curves::CurveAffine;
-use rand::thread_rng;
-use std::ops::Mul;
+use std::ops::MulAssign;
 
-pub fn trusted_setup_generator<
-    C1: CurveAffine + Mul<F, Output = C1>,
-    C2: CurveAffine + Mul<F, Output = C2>,
-    F: FieldExt,
->(
-    length: usize,
-) -> (Vec<C1>, Vec<C2>) {
-    let generator_g1 = C1::generator();
-    let generator_g2 = C2::generator();
+use halo2::{
+    arithmetic::Field,
+    halo2curves::{
+        bn256::{Fr, G1Affine, G2Affine},
+        group::Curve,
+    },
+};
+use rand::thread_rng;
+
+pub fn trusted_setup_generator(length: usize) -> (Vec<G1Affine>, Vec<G2Affine>) {
+    let generator_g1 = G1Affine::generator();
+    let generator_g2 = G2Affine::generator();
     let rng = &mut thread_rng();
-    let toxic_waste = F::random(rng);
+    let toxic_waste = Fr::random(rng);
     let mut trusted_setup_g1 = Vec::new();
     let mut trusted_setup_g2 = Vec::new();
 
-    let mut toxic_waste_powers = F::ONE;
+    let mut toxic_waste_powers = Fr::ONE;
     for _ in 0..length {
-        trusted_setup_g1.push(generator_g1.mul(toxic_waste_powers));
-        trusted_setup_g2.push(generator_g2.mul(toxic_waste_powers));
-
+        trusted_setup_g1.push((generator_g1 * toxic_waste_powers).to_affine());
+        trusted_setup_g2.push((generator_g2 * toxic_waste_powers).to_affine());
         toxic_waste_powers.mul_assign(toxic_waste);
     }
 
