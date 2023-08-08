@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["AccumulatorStrategy","GuardKZG","SingleStrategy"]};

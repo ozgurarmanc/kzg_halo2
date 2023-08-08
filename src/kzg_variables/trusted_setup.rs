@@ -1,5 +1,3 @@
-use std::ops::MulAssign;
-
 use halo2::{
     arithmetic::Field,
     halo2curves::{
@@ -21,7 +19,7 @@ pub fn trusted_setup_generator(length: usize) -> (Vec<G1Affine>, Vec<G2Affine>) 
     for _ in 0..length {
         trusted_setup_g1.push((generator_g1 * toxic_waste_powers).to_affine());
         trusted_setup_g2.push((generator_g2 * toxic_waste_powers).to_affine());
-        toxic_waste_powers.mul_assign(toxic_waste);
+        toxic_waste_powers *= toxic_waste;
     }
 
     (trusted_setup_g1, trusted_setup_g2)

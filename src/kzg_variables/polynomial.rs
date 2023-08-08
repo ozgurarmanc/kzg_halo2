@@ -6,9 +6,8 @@ use halo2::{
     },
 };
 use rand::thread_rng;
-use std::ops::{AddAssign, Mul};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Polynomial {
     pub(crate) coefficients: Vec<Fr>,
 }
@@ -51,7 +50,7 @@ impl Polynomial {
 
         // Long division algorithm for degree == 1 divisor
         for i in 0..coefficients.len() - 2 {
-            quotient.push(coefficients[i + 1] - quotient[i] * rhs.coefficients[1]);
+            quotient.push(coefficients[i + 1] - quotient[i] * rhs.coefficients[0]);
         }
         quotient.reverse();
 
@@ -60,9 +59,8 @@ impl Polynomial {
 
     pub fn commitment(&self, srs_1: &Vec<G1Affine>) -> G1Affine {
         let mut commitment_c1 = G1::default();
-
         for i in 0..self.coefficients.len() {
-            commitment_c1.add_assign(srs_1[i].mul(self.coefficients[i]));
+            commitment_c1 += srs_1[i] * self.coefficients[i];
         }
         commitment_c1.to_affine()
     }

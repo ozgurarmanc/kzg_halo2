@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"mod":["commitment","ipa","kzg"],"struct":["Coeff","EvaluationDomain","ExtendedLagrangeCoeff","LagrangeCoeff","PinnedEvaluationDomain","Polynomial","ProverQuery","Rotation","VerifierQuery"],"trait":["Basis","Guard","VerificationStrategy"]};

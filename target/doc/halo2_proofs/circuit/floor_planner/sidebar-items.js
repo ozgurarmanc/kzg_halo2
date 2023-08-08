@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["V1","V1Pass"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"externcrate":["group"],"mod":["arithmetic","pallas","vesta"],"struct":["Ep","EpAffine","Eq","EqAffine","Fp","Fq"]};

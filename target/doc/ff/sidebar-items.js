@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["helpers"],"struct":["BatchInverter"],"trait":["BatchInvert","BitViewSized","Field","FromUniformBytes","PrimeField","PrimeFieldBits","WithSmallOrderMulGroup"],"type":["FieldBits"]};

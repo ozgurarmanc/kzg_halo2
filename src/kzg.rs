@@ -3,6 +3,7 @@ use halo2::arithmetic::Field;
 use halo2::halo2curves::bn256::{Fr, G1Affine, G2Affine};
 use halo2::halo2curves::group::Curve;
 use halo2::halo2curves::pairing::PairingCurveAffine;
+
 pub fn kzg(polynomial: Polynomial, challenge: Fr) {
     // Constructing SRS that fits to our polynomial
     let (srs_c1, srs_c2) = trusted_setup_generator(polynomial.coefficients.len());
@@ -12,7 +13,7 @@ pub fn kzg(polynomial: Polynomial, challenge: Fr) {
     let mut numerator = polynomial.clone();
     numerator.coefficients[0] -= eval_of_challenge;
     // Calculating Q(x)
-    let denominator = Polynomial::new(vec![challenge, Fr::ONE]);
+    let denominator = Polynomial::new(vec![challenge.neg(), Fr::ONE]);
     let quotient_polynomial = numerator.quotient_calculator_for_kzg(denominator);
 
     // [P(x)]1 and [Q(x)]1
@@ -22,8 +23,7 @@ pub fn kzg(polynomial: Polynomial, challenge: Fr) {
     // [s - z]2
     let generator_g2 = G2Affine::generator();
     let challenge_g2 = generator_g2 * challenge;
-    let s_sub_z = srs_c2[0] - challenge_g2;
-
+    let s_sub_z = srs_c2[1] - challenge_g2;
     let pair_1 = quotient_commitment.pairing_with(&s_sub_z.to_affine());
 
     // [y]1

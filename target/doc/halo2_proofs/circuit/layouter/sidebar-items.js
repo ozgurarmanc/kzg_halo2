@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["RegionColumn"],"struct":["RegionShape"],"trait":["RegionLayouter","TableLayouter"]};

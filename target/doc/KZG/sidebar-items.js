@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["kzg","kzg_variables"],"trait":["FieldExt"]};

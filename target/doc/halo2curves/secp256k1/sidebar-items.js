@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["Fp","Fq","Secp256k1","Secp256k1Affine","Secp256k1Compressed","Secp256k1Uncompressed"]};

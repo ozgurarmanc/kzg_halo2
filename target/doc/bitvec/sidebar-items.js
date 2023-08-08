@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"macro":["BitArr","bitarr","bits"],"mod":["access","array","domain","field","index","macros","mem","order","prelude","ptr","slice","store","view"]};
