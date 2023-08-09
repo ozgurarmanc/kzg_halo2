@@ -68,7 +68,7 @@ impl Polynomial {
         Polynomial::new(quotient)
     }
 
-    /// Makes the commitment for the given polynomial
+    /// Makes the commitment for the given polynomial and SRS
     pub fn commitment(&self, srs_1: &Vec<G1Affine>) -> G1Affine {
         let mut commitment_c1 = G1::default();
         for i in 0..self.coefficients.len() {
