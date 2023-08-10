@@ -14,6 +14,9 @@ pub struct Polynomial {
     pub(crate) coefficients: Vec<Fr>,
 }
 
+// p(x)  =  4 * x^0 + 5 * x^1 + 6 * x^2
+// coeff = [4, 5, 6]
+// p(1)  =  4 * 1   + 5 * 1   + 6 * 1
 impl Polynomial {
     /// Creates a new polynomial from given vector
     pub fn new(coefficients: Vec<Fr>) -> Self {
@@ -43,6 +46,16 @@ impl Polynomial {
         eval
     }
 
+    // p(x) = (x - 2)(x - 3) = roots are 2, 3
+    // p(a) = 0, a = root of p
+    // p(x) = 1*x^2 + 2*x^1 + 1*x^0
+    // z = 5
+    // p(z) = 1*25 + 2*5 + 1 = 36 = y
+    // q(x) = (p(x) - y) / (x - z)
+    //      = (1*x^2 + 2*x^1 + 1 - 36) / (x - 5)
+    //      = (1*x^2 + 2*x^1 - 35) / (x - 5)
+    //      = (x + 7)(x - 5) / (x - 5)
+    //      = (x + 7)
     /// Calculates quotient using long division algorithm
     pub fn long_division(&self, rhs: Self) -> Self {
         // Will divide lhs to rhs with long division operation (Only divides perfect divisions).

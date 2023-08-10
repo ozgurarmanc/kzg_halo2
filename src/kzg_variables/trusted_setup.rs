@@ -7,8 +7,13 @@ use halo2::{
 };
 use rand::thread_rng;
 
+pub struct Params {
+    pub g1: Vec<G1Affine>,
+    pub g2: Vec<G2Affine>,
+}
+
 /// Builds SRS for the algorithm.
-pub fn trusted_setup_generator(length: usize) -> (Vec<G1Affine>, Vec<G2Affine>) {
+pub fn trusted_setup_generator(length: usize) -> Params {
     let generator_g1 = G1Affine::generator();
     let generator_g2 = G2Affine::generator();
     let rng = &mut thread_rng();
@@ -20,6 +25,9 @@ pub fn trusted_setup_generator(length: usize) -> (Vec<G1Affine>, Vec<G2Affine>) 
     let mut trusted_setup_g1 = Vec::new();
     let mut trusted_setup_g2 = Vec::new();
 
+    // x = toxic_waste
+    // SRS_g1 = g1 * x^0, g1 * x^1, g1 * x^2, g1 * x^3
+    // SRS_g2 = g2 * x^0, g2 * x^1, g2 * x^2, g2 * x^3
     let mut toxic_waste_powers = Fr::ONE;
     for _ in 0..length {
         trusted_setup_g1.push((generator_g1 * toxic_waste_powers).to_affine());
@@ -27,5 +35,8 @@ pub fn trusted_setup_generator(length: usize) -> (Vec<G1Affine>, Vec<G2Affine>) 
         toxic_waste_powers *= toxic_waste;
     }
 
-    (trusted_setup_g1, trusted_setup_g2)
+    Params {
+        g1: trusted_setup_g1,
+        g2: trusted_setup_g2,
+    }
 }
