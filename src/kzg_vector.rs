@@ -1,20 +1,19 @@
-/// (K)ate (Z)averucha (G)oldberg Commitment Algorithm
-///
-/// (Be careful to pronounce Kate as Kahr-tey :]. https://www.cs.purdue.edu/homes/akate/howtopronounce.html)
-use crate::kzg_variables::polynomial::Polynomial;
-use crate::kzg_variables::trusted_setup::Params;
-use halo2::arithmetic::Field;
-use halo2::halo2curves::bn256::{Fr, G1Affine, G2Affine};
-use halo2::halo2curves::group::Curve;
-use halo2::halo2curves::pairing::PairingCurveAffine;
+use halo2::{
+    arithmetic::Field,
+    halo2curves::{
+        bn256::{Fr, G1Affine, G2Affine},
+        group::Curve,
+        pairing::PairingCurveAffine,
+    },
+};
 
-pub struct Proof {
-    pub(crate) polynomial_commitment: G1Affine,
-    pub(crate) quotient_commitment: G1Affine,
-    pub(crate) eval_of_challenge: Fr,
-}
+use crate::{
+    kzg::Proof,
+    kzg_variables::{polynomial::Polynomial, trusted_setup::Params},
+};
 
-pub fn prove(polynomial: Polynomial, challenge: Fr, params: &Params) -> Proof {
+pub fn prove(vector: Vec<Fr>, challenge: Fr, params: &Params) -> Proof {
+    let polynomial = Polynomial::lagrange(vector);
     // Evaluating challenge and subtracting it from the constant value of the polynomial
     // Which will allow new polynomial to be perfect divided with the (x - challenge)
     let eval_of_challenge = polynomial.eval(&challenge);
@@ -64,30 +63,39 @@ pub fn verify(proof: Proof, challenge: Fr, params: &Params) -> bool {
     // This assertion checks if:
     // [Q(s)]_1 * [s - challenge]_2 == [P(s) - eval_of_challenge]_1
     // Thanks to pairing we can use s without knowing it.
+    // After here verifier satisfies that eval_of_challenge is constructed from given challenge as index.
+    // That means prover has the vector and that index returns the value from the vector.
     pair_1 == pair_2
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{prove, verify};
-    use crate::kzg_variables::{polynomial::Polynomial, trusted_setup::trusted_setup_generator};
-    use halo2::{arithmetic::Field, halo2curves::bn256::Fr};
-    use rand::thread_rng;
+    use crate::{
+        kzg_variables::trusted_setup::trusted_setup_generator,
+        kzg_vector::{prove, verify},
+    };
+    use halo2::{
+        arithmetic::Field,
+        halo2curves::{bn256::Fr, ff::PrimeField},
+    };
 
     #[test]
-    fn kzg_test() {
+    fn kzg_vector_test() {
         // Constructing Structured Reference String that is suitable to the given polynomial
         let k = 123;
         let params = trusted_setup_generator(k);
-        // Polynomial created from the circuit constraints
-        let circuit_size = 42;
-        let polynomial = Polynomial::random(circuit_size);
+        // Vector
+        let vector = vec![
+            Fr::ONE,
+            Fr::ONE + Fr::ONE + Fr::ONE + Fr::ONE + Fr::ONE,
+            Fr::ONE + Fr::ONE,
+            Fr::ONE + Fr::ONE + Fr::ONE,
+        ];
 
         // Generating challange known by both prover and the verifier
-        let rng = &mut thread_rng();
-        let challenge = Fr::random(rng);
+        let challenge = Fr::from_u128(0);
 
-        let proof = prove(polynomial, challenge, &params);
+        let proof = prove(vector, challenge, &params);
         let res = verify(proof, challenge, &params);
 
         assert!(res);

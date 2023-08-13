@@ -2,6 +2,7 @@ use halo2::{
     arithmetic::Field,
     halo2curves::{
         bn256::{Fr, G1Affine, G1},
+        ff::PrimeField,
         group::Curve,
     },
 };
@@ -46,6 +47,27 @@ impl Polynomial {
         eval
     }
 
+    /// Adds two polynomials
+    pub fn polynomial_addition(&self, rhs: Self) -> Self {
+        let mut big = self.coefficients.clone().max(rhs.coefficients.clone());
+        let small = self.coefficients.clone().min(rhs.coefficients.clone());
+        for i in 0..small.len() {
+            big[i] += small[i];
+        }
+        Polynomial::new(big)
+    }
+
+    /// Multiplies two polynomials
+    pub fn polynomial_multiplication(&self, rhs: Self) -> Self {
+        let mut result = vec![Fr::zero(); self.coefficients.len() + rhs.coefficients.len() - 1];
+        for i in 0..self.coefficients.len() {
+            for j in 0..rhs.coefficients.len() {
+                result[i + j] += self.coefficients[i] * rhs.coefficients[j];
+            }
+        }
+        Polynomial::new(result)
+    }
+
     // p(x) = (x - 2)(x - 3) = roots are 2, 3
     // p(a) = 0, a = root of p
     // p(x) = 1*x^2 + 2*x^1 + 1*x^0
@@ -79,6 +101,44 @@ impl Polynomial {
         quotient.reverse();
 
         Polynomial::new(quotient)
+    }
+
+    /// This function will build a polynomial from a vector.
+    /// Will use lagrange method only for the vectors.
+    pub fn lagrange(values: Vec<Fr>) -> Self {
+        let mut lagrange_polynomial = Polynomial::new(vec![Fr::ZERO]);
+        for i in 0..values.len() {
+            let mut mul_numerator = Polynomial::new(vec![Fr::ONE]);
+            let mut mul_denominator = Fr::ONE;
+
+            for j in 0..values.len() {
+                if i == j {
+                    continue;
+                }
+                let numerator =
+                    Polynomial::new(vec![Fr::from_u128(j.try_into().unwrap()).neg(), Fr::ONE]);
+                let denominator =
+                    Fr::from_u128(i.try_into().unwrap()) - Fr::from_u128(j.try_into().unwrap());
+                mul_numerator = mul_numerator.polynomial_multiplication(numerator.clone());
+                mul_denominator *= denominator;
+            }
+
+            let numerator =
+                mul_numerator.polynomial_multiplication(Polynomial::new(vec![mul_denominator
+                    .invert()
+                    .unwrap()]));
+
+            let res = Polynomial::new(
+                numerator
+                    .coefficients
+                    .iter()
+                    .map(|x| x * values[i])
+                    .collect(),
+            );
+
+            lagrange_polynomial = lagrange_polynomial.polynomial_addition(res);
+        }
+        lagrange_polynomial
     }
 
     /// Makes the commitment for the given polynomial and SRS
