@@ -1,7 +1,7 @@
 use halo2::{
     arithmetic::Field,
     halo2curves::{
-        bn256::{Fr, G1Affine, G1},
+        bn256::{Fr, G1Affine, G2Affine, G1, G2},
         ff::PrimeField,
         group::Curve,
     },
@@ -57,6 +57,16 @@ impl Polynomial {
         Polynomial::new(big)
     }
 
+    /// Subtracts two polynomials
+    pub fn polynomial_subtraction(&self, rhs: Self) -> Self {
+        let mut big = self.coefficients.clone().max(rhs.coefficients.clone());
+        let small = self.coefficients.clone().min(rhs.coefficients.clone());
+        for i in 0..small.len() {
+            big[i] -= small[i];
+        }
+        Polynomial::new(big)
+    }
+
     /// Multiplies two polynomials
     pub fn polynomial_multiplication(&self, rhs: Self) -> Self {
         let mut result = vec![Fr::zero(); self.coefficients.len() + rhs.coefficients.len() - 1];
@@ -80,10 +90,6 @@ impl Polynomial {
     //      = (x + 7)
     /// Calculates quotient using long division algorithm
     pub fn long_division(&self, rhs: Self) -> Self {
-        // Will divide lhs to rhs with long division operation (Only divides perfect divisions).
-        // Checks if rhs == degree 1 polynomial.
-        assert!(rhs.coefficients.len() == 2);
-
         // Here assigning it in reverse order and at the end of the function it will be reverted.
         let mut coefficients = self.coefficients.clone();
         coefficients.reverse();
@@ -92,7 +98,7 @@ impl Polynomial {
         // the numerator polynomial. That is why it is assigned here
         let mut quotient: Vec<Fr> = vec![coefficients[0]];
 
-        // Long division algorithm for degree == 1 divisor
+        // Long division algorithm
         for i in 0..coefficients.len() - 2 {
             quotient.push(coefficients[i + 1] - quotient[i] * rhs.coefficients[0]);
         }
@@ -103,9 +109,9 @@ impl Polynomial {
         Polynomial::new(quotient)
     }
 
-    /// This function will build a polynomial from a vector.
-    /// Will use lagrange method only for the vectors.
-    pub fn lagrange(values: Vec<Fr>) -> Self {
+    /// This function will build a polynomial from values and given domain.
+    /// Will use lagrange interpolation.
+    pub fn lagrange(values: Vec<Fr>, domain: Vec<Fr>) -> Self {
         let mut lagrange_polynomial = Polynomial::new(vec![Fr::ZERO]);
         for i in 0..values.len() {
             let mut mul_numerator = Polynomial::new(vec![Fr::ONE]);
@@ -117,8 +123,7 @@ impl Polynomial {
                 }
                 let numerator =
                     Polynomial::new(vec![Fr::from_u128(j.try_into().unwrap()).neg(), Fr::ONE]);
-                let denominator =
-                    Fr::from_u128(i.try_into().unwrap()) - Fr::from_u128(j.try_into().unwrap());
+                let denominator = domain[i] - domain[j];
                 mul_numerator = mul_numerator.polynomial_multiplication(numerator.clone());
                 mul_denominator *= denominator;
             }
@@ -142,11 +147,20 @@ impl Polynomial {
     }
 
     /// Makes the commitment for the given polynomial and SRS
-    pub fn commitment(&self, srs_1: &Vec<G1Affine>) -> G1Affine {
+    pub fn commitment_g1(&self, srs_1: &Vec<G1Affine>) -> G1Affine {
         let mut commitment_c1 = G1::default();
         for i in 0..self.coefficients.len() {
             commitment_c1 += srs_1[i] * self.coefficients[i];
         }
         commitment_c1.to_affine()
+    }
+
+    /// Makes the commitment for the given polynomial and SRS
+    pub fn commitment_g2(&self, srs_2: &Vec<G2Affine>) -> G2Affine {
+        let mut commitment_c2 = G2::default();
+        for i in 0..self.coefficients.len() {
+            commitment_c2 += srs_2[i] * self.coefficients[i];
+        }
+        commitment_c2.to_affine()
     }
 }

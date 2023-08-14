@@ -25,8 +25,8 @@ pub fn prove(polynomial: Polynomial, challenge: Fr, params: &Params) -> Proof {
     let quotient_polynomial = numerator.long_division(denominator);
 
     // [P(x)]_1 and [Q(x)]_1
-    let polynomial_commitment = polynomial.commitment(&params.g1);
-    let quotient_commitment = quotient_polynomial.commitment(&params.g1);
+    let polynomial_commitment = polynomial.commitment_g1(&params.g1);
+    let quotient_commitment = quotient_polynomial.commitment_g1(&params.g1);
 
     Proof {
         polynomial_commitment,
